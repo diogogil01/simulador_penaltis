@@ -1,0 +1,243 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #eef2f5;
+  color: #20252b;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.pagina {
+  min-height: 100vh;
+}
+
+.cabecalho {
+  background: #18324a;
+  color: white;
+  padding: 20px 30px;
+}
+
+.cabecalho h1 {
+  margin: 0;
+}
+
+.cabecalho p {
+  margin: 5px 0 0;
+}
+
+.conteudo {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+.painel {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.painel h2 {
+  font-size: 18px;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.painel h2:not(:first-child) {
+  margin-top: 25px;
+}
+
+.painel label {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.painel input {
+  width: 100%;
+  padding: 9px;
+  margin-top: 5px;
+  border: 1px solid #bcc6cf;
+  border-radius: 6px;
+}
+
+.painel input:disabled {
+  background: #f1f1f1;
+}
+
+.painel button {
+  width: 100%;
+  margin-top: 22px;
+  padding: 11px;
+  border: 0;
+  border-radius: 6px;
+  background: #237a3c;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.painel button:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.painel .botao-secundario {
+  margin-top: 8px;
+  background: #5c6873;
+}
+
+.erro {
+  color: #b52525;
+  font-weight: bold;
+}
+
+.area-simulacao {
+  min-width: 0;
+}
+
+.gol {
+  position: relative;
+  width: 100%;
+  max-width: 850px;
+  aspect-ratio: 7.32 / 2.44;
+  margin: 30px auto;
+  border: 10px solid white;
+  background: #4c9c57;
+  box-shadow: 0 4px 15px #00000025;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.rede {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(white 1px, transparent 1px),
+    linear-gradient(90deg, white 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.goleiro {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 70px;
+  height: 120px;
+  transform: translateX(-50%);
+  transition-property: left;
+  transition-timing-function: linear;
+  z-index: 3;
+}
+
+.cabeca {
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  border-radius: 50%;
+  background: #d7a16e;
+}
+
+.corpo {
+  width: 48px;
+  height: 75px;
+  margin: auto;
+  background: #2457a7;
+  border-radius: 6px;
+}
+
+.braco {
+  position: absolute;
+  top: 43px;
+  width: 42px;
+  height: 12px;
+  background: #2457a7;
+  border-radius: 6px;
+}
+
+.braco-esquerdo {
+  left: -22px;
+  transform: rotate(-18deg);
+}
+
+.braco-direito {
+  right: -22px;
+  transform: rotate(18deg);
+}
+
+.bola {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 24px;
+  height: 24px;
+  transform: translate(-50%, 50%);
+  border-radius: 50%;
+  border: 2px solid #222;
+  background:
+    radial-gradient(circle at 35% 35%, #222 0 10%, transparent 11%),
+    radial-gradient(circle at 70% 62%, #222 0 9%, transparent 10%),
+    white;
+  transition-property: left, bottom;
+  transition-timing-function: linear;
+  z-index: 5;
+}
+
+.alvo {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, 50%);
+  border: 3px solid #cf2020;
+  border-radius: 50%;
+  background: #ffffff90;
+  z-index: 2;
+}
+
+.resultado {
+  max-width: 850px;
+  margin: auto;
+  background: white;
+  padding: 18px;
+  border-radius: 10px;
+}
+
+.resultado h2 {
+  margin-top: 0;
+  font-size: 32px;
+}
+
+.status {
+  font-weight: bold;
+}
+
+.texto-gol {
+  color: #b52525;
+}
+
+.texto-defesa {
+  color: #237a3c;
+}
+
+@media (max-width: 850px) {
+  .conteudo {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.dica {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #5c6873;
+}
