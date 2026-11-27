@@ -3,4 +3,3 @@ frontend/dist/
 backend/.venv/
 __pycache__/
 *.pyc
-backend/simulacoes.db
