@@ -241,3 +241,48 @@ input {
   font-size: 13px;
   color: #5c6873;
 }
+
+
+/* =====================================
+   HISTORICO DE SIMULACOES
+===================================== */
+
+.historico {
+  max-width: 850px;
+  margin: 20px auto;
+  padding: 18px;
+  background: white;
+  border-radius: 10px;
+}
+
+.historico h2 {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+.tabela-rolagem {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tabela-historico {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.tabela-historico th,
+.tabela-historico td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #dce2e7;
+  white-space: nowrap;
+}
+
+.tabela-historico th {
+  background: #eef2f5;
+}
+
+.tabela-historico tbody tr:hover {
+  background: #f5f8fa;
+}

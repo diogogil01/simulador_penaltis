@@ -1,18 +1,29 @@
-import { useState } from "react"
-import { simularPenalti } from "./services/api"
-import type { ResultadoSimulacao } from "./types/simulation"
+
+import { useEffect, useState } from "react"
+import type { MouseEvent } from "react"
+
+import {
+  simularPenalti,
+  buscarHistorico
+} from "./services/api"
+
+import type {
+  ResultadoSimulacao,
+  HistoricoSimulacao
+} from "./types/simulation"
+
 
 function App() {
-  // dados do chute
+  // Dados do chute
   const [velocidade, setVelocidade] = useState(90)
   const [alvoX, setAlvoX] = useState(2)
   const [alvoY, setAlvoY] = useState(1.5)
 
-  // dados do goleiro
+  // Dados do goleiro
   const [tempoReacao, setTempoReacao] = useState(0.2)
   const [alturaGoleiro, setAlturaGoleiro] = useState(1.90)
 
-  // dados da animacao
+  // Dados da animacao
   const [resultado, setResultado] =
     useState<ResultadoSimulacao | null>(null)
 
@@ -23,8 +34,36 @@ function App() {
   const [duracaoBola, setDuracaoBola] = useState(1000)
   const [duracaoGoleiro, setDuracaoGoleiro] = useState(500)
 
+  // Historico das simulacoes
+  const [historico, setHistorico] =
+    useState<HistoricoSimulacao[]>([])
+
+  const [erroHistorico, setErroHistorico] = useState("")
+
+
+  // Busca o historico ao abrir a pagina
+  useEffect(() => {
+    buscarHistorico()
+      .then(setHistorico)
+      .catch(() => {
+        setErroHistorico("Nao foi possivel carregar o historico")
+      })
+  }, [])
+
+
+  // Atualiza a tabela de historico
+  async function atualizarHistorico() {
+    try {
+      const registros = await buscarHistorico()
+      setHistorico(registros)
+      setErroHistorico("")
+    } catch {
+      setErroHistorico("Nao foi possivel atualizar o historico")
+    }
+  }
+
+
   function resetar() {
-    // volta a simulacao para o inicio
     setResultado(null)
     setErro("")
     setAnimando(false)
@@ -32,40 +71,36 @@ function App() {
     setGoleiroX(0)
   }
 
+
   function escolherAlvo(
-    evento: React.MouseEvent<HTMLDivElement>
+    evento: MouseEvent<HTMLDivElement>
   ) {
-    // nao altera o alvo durante a simulacao
     if (animando) {
       return
     }
 
-    // pega o tamanho e a posicao do gol
     const gol = evento.currentTarget
     const area = gol.getBoundingClientRect()
 
-    // calcula a posicao do clique dentro do gol
     const cliqueX = evento.clientX - area.left
     const cliqueY = evento.clientY - area.top
 
-    // converte pixels para metros
+    // Converte pixels para metros
     let novoX = (cliqueX / area.width) * 7.32 - 3.66
     let novoY = ((area.height - cliqueY) / area.height) * 2.44
 
-    // limita o alvo dentro do gol
     novoX = Math.max(-3.66, Math.min(3.66, novoX))
     novoY = Math.max(0, Math.min(2.44, novoY))
 
-    // atualiza os campos e o ponto vermelho
     setAlvoX(Number(novoX.toFixed(2)))
     setAlvoY(Number(novoY.toFixed(2)))
 
-    // limpa a simulacao anterior
     setResultado(null)
     setErro("")
     setBolaNoAlvo(false)
     setGoleiroX(0)
   }
+
 
   async function simular() {
     setErro("")
@@ -75,6 +110,7 @@ function App() {
     setGoleiroX(0)
 
     try {
+      // Envia os parametros ao backend
       const resposta = await simularPenalti({
         velocidade_bola: velocidade,
         alvo_x: alvoX,
@@ -83,7 +119,10 @@ function App() {
         altura_goleiro: alturaGoleiro
       })
 
-      // aumenta o tempo apenas para a animacao ficar visivel
+      // Atualiza o historico apos salvar
+      void atualizarHistorico()
+
+      // Escala usada somente na animacao visual
       const escalaTempo = 2500
 
       const tempoVisualBola = Math.max(
@@ -102,7 +141,7 @@ function App() {
       setDuracaoBola(tempoVisualBola)
       setDuracaoGoleiro(tempoVisualGoleiro)
 
-      // calcula a direcao do movimento
+      // Direcao do movimento do goleiro
       const direcao = alvoX < 0 ? -1 : 1
 
       const deslocamentoVisual = Math.min(
@@ -110,53 +149,56 @@ function App() {
         resposta.deslocamento_goleiro
       ) * direcao
 
-      // pequeno atraso para iniciar a transicao
       setTimeout(() => {
         setBolaNoAlvo(true)
       }, 50)
 
-      // goleiro comeca a se mover depois da reacao
       setTimeout(() => {
         setGoleiroX(deslocamentoVisual)
       }, tempoVisualReacao)
 
-      // mostra o resultado quando a bola chega
       setTimeout(() => {
         setResultado(resposta)
         setAnimando(false)
       }, tempoVisualBola + 80)
 
     } catch {
-      setErro("nao foi possivel realizar a simulacao")
+      setErro("Nao foi possivel realizar a simulacao")
       setAnimando(false)
     }
   }
 
+
+  // Posicoes visuais da bola e do goleiro
   const alvoLeft = 50 + (alvoX / 7.32) * 100
   const alvoBottom = (alvoY / 2.44) * 100
 
   const bolaLeft = bolaNoAlvo ? alvoLeft : 50
   const bolaBottom = bolaNoAlvo ? alvoBottom : 2
 
-  const goleiroLeft =
-    50 + (goleiroX / 7.32) * 100
+  const goleiroLeft = 50 + (goleiroX / 7.32) * 100
 
-  // ajusta a altura visual do goleiro
-  const alturaVisualGoleiro =
-    Math.max(85, Math.min(145, alturaGoleiro * 63))
+  const alturaVisualGoleiro = Math.max(
+    85,
+    Math.min(145, alturaGoleiro * 63)
+  )
+
 
   return (
     <div className="pagina">
+
       <header className="cabecalho">
         <h1>Simulador de Penaltis e Goleiro</h1>
-        <p>primeiro prototipo funcional</p>
+        <p>Simulacao computacional de cobrancas de penalti</p>
       </header>
 
       <main className="conteudo">
-        <section className="painel">
-          <h2>parametros do chute</h2>
 
-          <label>velocidade da bola (km/h)</label>
+        {/* Painel dos parametros */}
+        <section className="painel">
+          <h2>Parametros do chute</h2>
+
+          <label>Velocidade da bola (km/h)</label>
           <input
             type="number"
             value={velocidade}
@@ -166,7 +208,7 @@ function App() {
             }
           />
 
-          <label>posicao horizontal x (m)</label>
+          <label>Posicao horizontal X (m)</label>
           <input
             type="number"
             step="0.1"
@@ -177,7 +219,7 @@ function App() {
             }
           />
 
-          <label>altura y (m)</label>
+          <label>Altura Y (m)</label>
           <input
             type="number"
             step="0.1"
@@ -189,12 +231,13 @@ function App() {
           />
 
           <p className="dica">
-            voce tambem pode clicar diretamente no gol para escolher o alvo
+            Voce tambem pode clicar diretamente no gol
+            para escolher o alvo.
           </p>
 
-          <h2>parametros do goleiro</h2>
+          <h2>Parametros do goleiro</h2>
 
-          <label>tempo de reacao (s)</label>
+          <label>Tempo de reacao (s)</label>
           <input
             type="number"
             step="0.01"
@@ -205,7 +248,7 @@ function App() {
             }
           />
 
-          <label>altura do goleiro (m)</label>
+          <label>Altura do goleiro (m)</label>
           <input
             type="number"
             step="0.01"
@@ -219,14 +262,14 @@ function App() {
           />
 
           <p className="dica">
-            a velocidade do goleiro e fixa nesta versao
+            A velocidade do goleiro e fixa nesta versao.
           </p>
 
           <button
             onClick={simular}
             disabled={animando}
           >
-            {animando ? "simulando..." : "simular"}
+            {animando ? "Simulando..." : "Simular"}
           </button>
 
           <button
@@ -234,13 +277,16 @@ function App() {
             onClick={resetar}
             disabled={animando}
           >
-            resetar
+            Resetar
           </button>
 
           {erro && <p className="erro">{erro}</p>}
         </section>
 
+
+        {/* Visualizacao da simulacao */}
         <section className="area-simulacao">
+
           <div
             className="gol"
             onClick={escolherAlvo}
@@ -279,45 +325,48 @@ function App() {
             ></div>
           </div>
 
+
+          {/* Resultado da cobranca */}
           <div className="resultado">
+
             {animando && (
               <p className="status">
-                simulacao em andamento...
+                Simulacao em andamento...
               </p>
             )}
 
             {!animando && !resultado && (
-              <p>
-                escolha o alvo e clique em simular
-              </p>
+              <p>Escolha o alvo e clique em Simular.</p>
             )}
 
             {resultado && (
               <>
-                <h2 className={
-                  resultado.resultado === "GOL"
-                    ? "texto-gol"
-                    : "texto-defesa"
-                }>
+                <h2
+                  className={
+                    resultado.resultado === "GOL"
+                      ? "texto-gol"
+                      : "texto-defesa"
+                  }
+                >
                   {resultado.resultado}
                 </h2>
 
                 <p>
-                  tempo da bola:{" "}
+                  Tempo da bola:{" "}
                   <strong>
                     {resultado.tempo_bola.toFixed(3)} s
                   </strong>
                 </p>
 
                 <p>
-                  tempo de movimento do goleiro:{" "}
+                  Tempo de movimento do goleiro:{" "}
                   <strong>
                     {resultado.tempo_movimento_goleiro.toFixed(3)} s
                   </strong>
                 </p>
 
                 <p>
-                  deslocamento do goleiro:{" "}
+                  Deslocamento do goleiro:{" "}
                   <strong>
                     {resultado.deslocamento_goleiro.toFixed(2)} m
                   </strong>
@@ -325,6 +374,71 @@ function App() {
               </>
             )}
           </div>
+
+
+          {/* Historico do banco SQLite */}
+          <div className="historico">
+
+            <h2>Historico de simulacoes</h2>
+
+            <p className="dica">
+              Ultimas 50 simulacoes registradas no banco de dados.
+            </p>
+
+            {erroHistorico && (
+              <p className="erro">{erroHistorico}</p>
+            )}
+
+            {!erroHistorico && historico.length === 0 && (
+              <p>Nenhuma simulacao registrada.</p>
+            )}
+
+            {historico.length > 0 && (
+              <div className="tabela-rolagem">
+                <table className="tabela-historico">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Data/hora (UTC)</th>
+                      <th>Velocidade</th>
+                      <th>Alvo X/Y</th>
+                      <th>Tempo da bola</th>
+                      <th>Resultado</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {historico.map((registro) => (
+                      <tr key={registro.id}>
+                        <td>{registro.id}</td>
+                        <td>{registro.data_hora}</td>
+                        <td>
+                          {registro.velocidade_bola.toFixed(1)} km/h
+                        </td>
+                        <td>
+                          {registro.alvo_x.toFixed(2)} /{" "}
+                          {registro.alvo_y.toFixed(2)} m
+                        </td>
+                        <td>
+                          {registro.tempo_bola.toFixed(3)} s
+                        </td>
+                        <td
+                          className={
+                            registro.resultado === "GOL"
+                              ? "texto-gol"
+                              : "texto-defesa"
+                          }
+                        >
+                          <strong>{registro.resultado}</strong>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
         </section>
       </main>
     </div>

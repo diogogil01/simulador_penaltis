@@ -1,69 +1,41 @@
-# Simulador de Penaltis e Goleiro
+# Simulador de Pênaltis e Goleiro
 
-Primeira versao visual do projeto.
+Projeto em Engenharia da Computação I — UNIVAP, 2026.
 
-## tecnologias
+## Arquitetura
+Frontend React/TypeScript/Vite, backend Python/FastAPI e banco relacional SQLite.
+O modelo idealizado considera gravidade, alvo, velocidade da bola e tempo de reação. O goleiro parte do centro, desloca-se a até 5 m/s (valor fixo) e tem alcance vertical simplificado pela altura informada.
 
-- react
-- typescript
-- vite
-- python
-- fastapi
-- api rest
+## Execução no Windows
+Pré-requisitos: Python e Node.js compatível com Vite 7 (20.19+ ou 22.12+), npm.
+Abra dois terminais na raiz do projeto.
 
-## modelo atual
-
-O usuario informa:
-
-- velocidade da bola
-- posicao horizontal do chute
-- altura do chute
-- tempo de reacao do goleiro
-- altura do goleiro
-
-A velocidade do goleiro e fixa em 5.0 m/s nesta versao.
-
-A defesa considera dois pontos:
-
-1. o goleiro precisa conseguir chegar na posicao horizontal da bola
-2. a altura da bola precisa estar dentro da altura do goleiro
-
-Este modelo ainda e simplificado e sera melhorado nas proximas etapas.
-
-## como iniciar o backend
-
-Abra um terminal na pasta `backend`.
-
+Terminal 1:
 ```powershell
+cd backend
 python -m venv .venv
-.\.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host localhost --port 8000
 ```
-
-Backend:
-
-```text
-http://localhost:8000
-```
-
-Documentacao da api:
-
-```text
-http://localhost:8000/docs
-```
-
-## como iniciar o frontend
-
-Abra outro terminal na pasta `frontend`.
-
+Terminal 2:
 ```powershell
-npm install
-npm run dev
+cd frontend
+npm ci
+npm run dev -- --host localhost --port 5173
 ```
+Acesse http://localhost:5173 e a documentação da API em http://localhost:8000/docs.
+Para compilar o frontend: `npm run build`.
+Se as dependências já estiverem instaladas, não é necessário reinstalá-las.
 
-Normalmente o frontend fica em:
+## Banco de dados
+`backend/simulacoes.db` contém 7 registros originais (5 GOL, 2 DEFESA).
+`banco/backup_simulacoes.sql` contém a exportação SQL dos mesmos dados.
+A tabela é criada automaticamente quando a API salva ou consulta uma simulação.
+GET /simulacoes lista os últimos 50 registros por ID decrescente.
+POST /simulacoes calcula e grava o resultado.
+O arquivo do banco é ignorado pelo Git, mas incluído neste pacote para demonstração.
 
-```text
-http://localhost:5173
-```
+## Demonstração
+90 km/h, X=2, Y=1,5, reação=0,2 s, altura=1,90 m: GOL.
+Com X=0 e demais parâmetros iguais: DEFESA.
+Confirme a tabela de histórico e atualize a página para mostrar persistência.
