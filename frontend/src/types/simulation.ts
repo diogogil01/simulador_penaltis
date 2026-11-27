@@ -1,3 +1,4 @@
+
 export type DadosSimulacao = {
   velocidade_bola: number
   alvo_x: number
@@ -12,3 +13,10 @@ export type ResultadoSimulacao = {
   deslocamento_goleiro: number
   resultado: string
 }
+
+export type HistoricoSimulacao =
+  DadosSimulacao &
+  ResultadoSimulacao & {
+    id: number
+    data_hora: string
+  }
